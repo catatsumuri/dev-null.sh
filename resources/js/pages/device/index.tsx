@@ -1,8 +1,18 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Form, Head, Link, router } from '@inertiajs/react';
 import { useRef, useState } from 'react';
 import AppController from '@/actions/App/Http/Controllers/AppController';
+import BrowserSessionController from '@/actions/App/Http/Controllers/BrowserSessionController';
 import DeviceController from '@/actions/App/Http/Controllers/DeviceController';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { WordmarkText } from '@/components/wordmark-text';
 import { useNow } from '@/hooks/use-now';
 import AppLayout from '@/layouts/app-layout';
@@ -10,7 +20,13 @@ import SettingsLayout from '@/layouts/settings/layout';
 import { cn, formatFullDateTime, formatRelativeTime } from '@/lib/utils';
 import type { Device } from '@/types';
 
-export default function Index({ devices }: { devices: Device[] }) {
+export default function Index({
+    devices,
+    canRevokeBrowserSessions,
+}: {
+    devices: Device[];
+    canRevokeBrowserSessions: boolean;
+}) {
     const headingRef = useRef<HTMLHeadingElement>(null);
 
     // A revoked row unmounts with the focus inside it, so it moves to the next row, or the heading...
@@ -78,6 +94,63 @@ export default function Index({ devices }: { devices: Device[] }) {
                     </ul>
                 )}
             </section>
+
+            {canRevokeBrowserSessions && (
+                <section className="border-t px-4 py-6 sm:px-6">
+                    <h2 className="text-lg font-semibold tracking-tight">
+                        Browser sessions
+                    </h2>
+                    <p className="mt-1 max-w-prose text-sm text-pretty text-muted-foreground">
+                        Sign out of every browser where you’re signed in,
+                        including this one. You’ll need to sign in with GitHub
+                        again.
+                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        Approved apps stay connected.
+                    </p>
+
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="outline" className="mt-4">
+                                Sign out of all browsers
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogTitle>Sign out of all browsers?</DialogTitle>
+                            <DialogDescription>
+                                You’ll be signed out here and in every other
+                                browser. Sign in with GitHub to continue.
+                                Approved apps stay connected.
+                            </DialogDescription>
+                            <Form {...BrowserSessionController.destroy.form()}>
+                                {({ processing }) => (
+                                    <DialogFooter>
+                                        <DialogClose asChild>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                disabled={processing}
+                                                autoFocus
+                                            >
+                                                Cancel
+                                            </Button>
+                                        </DialogClose>
+                                        <Button
+                                            type="submit"
+                                            variant="destructive"
+                                            disabled={processing}
+                                        >
+                                            {processing
+                                                ? 'Signing out…'
+                                                : 'Sign out of all browsers'}
+                                        </Button>
+                                    </DialogFooter>
+                                )}
+                            </Form>
+                        </DialogContent>
+                    </Dialog>
+                </section>
+            )}
         </>
     );
 }

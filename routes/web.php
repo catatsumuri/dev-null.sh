@@ -9,6 +9,7 @@ use App\Http\Controllers\AppController;
 use App\Http\Controllers\BanController;
 use App\Http\Controllers\BannedController;
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\BrowserSessionController;
 use App\Http\Controllers\BulkActivityController;
 use App\Http\Controllers\CallController;
 use App\Http\Controllers\ChangelogController;
@@ -356,6 +357,10 @@ Route::middleware('auth')->group(function (): void {
     Route::post('logout', [SessionController::class, 'destroy'])
         ->middleware(SerializePushSessions::class)
         ->name('logout');
+
+    Route::delete('browser-sessions', [BrowserSessionController::class, 'destroy'])
+        ->middleware(['throttle:10,1', SerializePushSessions::class])
+        ->name('browser-session.destroy');
 
     Route::put('terms', [UserTermsController::class, 'update'])->name('user-terms.update');
 

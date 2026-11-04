@@ -45,6 +45,16 @@ it('lists no devices', function (): void {
             ->has('devices', 0));
 });
 
+it('offers browser session revocation only with database sessions', function (string $driver): void {
+    config(['session.driver' => $driver]);
+
+    $this->actingAs(User::factory()->create())->get(route('device.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('device/index')
+            ->where('canRevokeBrowserSessions', $driver === 'database'));
+})->with(['database', 'array']);
+
 it('revokes a device', function (): void {
     $user = User::factory()->create();
     $device = Device::factory()->for($user)->create();

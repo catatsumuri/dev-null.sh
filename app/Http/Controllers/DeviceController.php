@@ -10,6 +10,7 @@ use App\Models\Device;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Config;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,6 +23,7 @@ final readonly class DeviceController
     {
         return Inertia::render('device/index', [
             'devices' => $user->devices()->latest('approved_at')->get(),
+            'canRevokeBrowserSessions' => Config::string('session.driver') === 'database',
         ]);
     }
 
